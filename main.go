@@ -46,11 +46,11 @@ func addProduct(w http.ResponseWriter, r *http.Request) { //method that will tak
 	}
 
 	cfg := mysql.Config{ //making our DB config to connect
-		User:   "root",
-		Passwd: "Frodobaggins123",
+		User:   "admin_name",
+		Passwd: "database_password",
 		Net:    "tcp",
 		Addr:   "localhost:3306",
-		DBName: "golang",
+		DBName: "our_db_name",
 	}
 
 	db, err := sql.Open("mysql", cfg.FormatDSN()) //using DB config to connect
