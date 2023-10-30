@@ -1,0 +1,101 @@
+body {
+    font-family: basic-sans, sans-serif;
+    background-color: #333745;
+    color: #F3DE8A;
+    margin: 0;
+    padding: 0;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #282C34;
+    padding: 20px;
+}
+
+.container {
+    width: 80%;
+    max-width: 800px;
+    background-color: #383c44; 
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #97A7B3;
+    background-color: #333745;
+    color: #F3DE8A;
+    border-radius: 4px;
+    font-family: basic-sans, sans-serif;
+    font-weight: 400;
+    box-sizing: border-box; /* Added this to account for padding in input width */
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    box-shadow: 0 0 5px #CAE7B9;
+}
+
+button {
+    background-color: #EB9486;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px 5px 0 0; /* Added this for spacing between buttons */
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #CAE7B9;
+}
+.tab-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.tab-button {
+    flex: 1;
+    margin: 5px;
+    text-align: center;
+    max-width: 140px;
+}
+
+.tab-button.active {
+    background-color: #EB9486;
+}
+
+.tab-container {
+    width: 80%;
+    max-width: 800px;
+    background-color: #383c44; /* Slightly lighter shade for the button section */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); /* Optional: adds a subtle shadow */
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    color: #F3DE8A;
+}
+
+::placeholder {
+    color: #33745;
+    opacity: 1;
+}
+
+select {
+    appearance: none;
+    background-color: #333745;
+}
+
