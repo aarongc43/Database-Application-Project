@@ -21,6 +21,11 @@ type NewProduct struct {
 	Description string `json:"description"`
 }
 
+type NewProductResponse struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error,omitempty"`
+}
+
 func addProduct(w http.ResponseWriter, r *http.Request) {
 	var request NewProduct
 
@@ -46,65 +51,32 @@ func addProduct(w http.ResponseWriter, r *http.Request) {
 
 	defer db.Close()
 
-	tx, err := db.Begin() //creating transaction for multi inserts
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	//query for category_ID here?
 
-	productInsertStatement, err := tx.Prepare("INSERT INTO products (productName, price, quantity, description) VALUES (?,?,?,?,?)")
+	productInsertStatement, err := db.Prepare("INSERT INTO products (productName, price, quantity, description, categoryID) VALUES (?,?,?,?,?)")
 	if err != nil {
-		tx.Rollback()
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
 		return
 	}
 	defer productInsertStatement.Close()
 
 	_, err = productInsertStatement.Exec(0, request.Name, request.Price, request.Quantity, request.Description)
 	if err != nil {
-		tx.Rollback()
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "Product insertion error")
 		return
 	}
 
-	categoryInsertStatement, err := tx.Prepare("INSERT INTO categories (Cat_Name) VALUES (?,?)")
-	if err != nil {
-		tx.Rollback()
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer categoryInsertStatement.Close()
+	response := NewProductResponse{Success: true}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(response)
+}
 
-	_, err = categoryInsertStatement.Exec(0, request.Category)
-	if err != nil {
-		tx.Rollback()
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	vendorInsertStatement, err := tx.Prepare("INSERT INTO vendors (VendorName) VALUES (?,?)")
-	if err != nil {
-		tx.Rollback()
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer vendorInsertStatement.Close()
-
-	_, err = vendorInsertStatement.Exec(0, request.Vendor)
-	if err != nil {
-		tx.Rollback()
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Products, vendor, and category inserted successfully"))
+func writeJSONErrorResponse(w http.ResponseWriter, statusCode int, errMessage string) { //method to reduce code repetition when returning a JSON formatted error response
+	response := NewProductResponse{Success: false, Error: errMessage}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(response)
 }
 
 func handleRequest(corsMiddleware func(http.Handler) http.Handler) {
@@ -121,7 +93,7 @@ func handleRequest(corsMiddleware func(http.Handler) http.Handler) {
 func main() {
 
 	corsMiddleware := handlers.CORS(
-		handlers.AllowedOrigins([]string{"http://localhost:5500"}),
+		handlers.AllowedOrigins([]string{"http://localhost:3000"}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
 		handlers.AllowedHeaders([]string{"Content-Type"}),
 	)
