@@ -14,9 +14,8 @@ import (
 
 type NewProduct struct {
 	Category    string `json:"category"`
-	Vendor      string `json:"vendor"`
 	Name        string `json:"productName"`
-	Price       string `json:"price"`
+	Price       int    `json:"price"`
 	Quantity    int    `json:"quantity"`
 	Description string `json:"description"`
 }
@@ -30,15 +29,16 @@ func addProduct(w http.ResponseWriter, r *http.Request) {
 	var request NewProduct
 
 	err := json.NewDecoder(r.Body).Decode(&request)
-	fmt.Print(err)
 
 	if err != nil {
+		fmt.Println("Error decoding JSON:", err)
+		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
 		return
 	}
 
 	cfg := mysql.Config{
 		User:   "root",
-		Passwd: "database_password",
+		Passwd: "Frodobaggins123",
 		Net:    "tcp",
 		Addr:   "localhost:3306",
 		DBName: "web_store",
@@ -51,21 +51,32 @@ func addProduct(w http.ResponseWriter, r *http.Request) {
 
 	defer db.Close()
 
-	//query for category_ID here?
+	getCategoryIDStatement, err := db.Prepare("SELECT Category_ID FROM categories WHERE Cat_Name = ?")
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
+		return
+	}
+	defer getCategoryIDStatement.Close()
 
-	productInsertStatement, err := db.Prepare("INSERT INTO products (productName, price, quantity, description, categoryID) VALUES (?,?,?,?,?)")
+	var categoryID int
+	err = getCategoryIDStatement.QueryRow(request.Category).Scan(&categoryID)
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "Category not found")
+		return
+	}
+
+	productInsertStatement, err := db.Prepare("INSERT INTO products (Prod_Name, Category_ID, Prod_Price, Prod_Qty, description) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
 		return
 	}
 	defer productInsertStatement.Close()
 
-	_, err = productInsertStatement.Exec(0, request.Name, request.Price, request.Quantity, request.Description)
+	_, err = productInsertStatement.Exec(request.Name, categoryID, request.Price, request.Quantity, request.Description)
 	if err != nil {
 		writeJSONErrorResponse(w, http.StatusInternalServerError, "Product insertion error")
 		return
 	}
-
 	response := NewProductResponse{Success: true}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
