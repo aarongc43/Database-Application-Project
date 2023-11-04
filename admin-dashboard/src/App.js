@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
@@ -11,6 +11,9 @@ function App() {
         quantity: "",
         description: ""
     });
+
+    const [vendors, setVendor] = useState([]);
+    const [categories, setCategory] = useState([]);
     
     const [selectedTab, setSelectedTab] = useState("Customers");
 
@@ -25,6 +28,16 @@ function App() {
     const sendProductToSQL = async (product) => {
         // API call logic
         console.log("sending product to SQL server:", product);
+    };
+
+    const addVendorToSQL = async (vendorName) => {
+        // API call to main.go to add vendor
+        console.log("sending vendor to SQL server:", vendorName);
+    };
+
+    const addCategoryToSQL = async (categoryName) => {
+        // API call to main.go to add category
+        console.log("sending category to SQL server:", categoryName);
     };
     /*
     POST  payload
@@ -59,18 +72,66 @@ function App() {
         fetchTableData(table.toLowerCase());
     };
 
+    useEffect(() => {
+        // need to be replaced with API calls that get a list of 
+        // vendors and categories
+        fetchVendors();
+        fetchCategories();
+    }, []);
+
+    const fetchVendors = async() => {
+        // API call from main.go
+        console.log("fetched and updated list of current vendors:");
+    };
+    
+    const fetchCategories = async() => {
+        // API call from main.go
+        console.log("fetched and updated list of current categories:");
+    };
+
     return (
         <div className="app-container">
         <div className="container">
             <div>
+                <h2>Choose what you would like to add below</h2>
                 <select className="input" onChange={handleDropdown}>
                     <option>Products</option>
+                    <option>Vendor</option>
+                    <option>Category</option>
                 </select>
             </div>
 
             {selectedOption === "Products" && (
                 <div>
-                    {["category", "vendor", "productName", "price", "quantity"].map(field => (
+                    <select
+                        className="input"
+                        name="vendor"
+                        value={newProduct.vendor}
+                        onChange={handleInputChange}
+                    >
+                        <option value="">Select Vendor</option>
+                        {vendors.map((vendor) => (
+                            <option key={vendor.id} value={vendor.name}>
+                                {vendor.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    <select
+                        className="input"
+                        name="category"
+                        value={newCategory.vendor}
+                        onChange={handleInputChange}
+                    >
+                        <option value="">Select Category</option>
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.name}>
+                                {category.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    {["productName", "price", "quantity"].map(field => (
                         <input
                             key={field}
                             className="input"
@@ -91,6 +152,45 @@ function App() {
 
                     <button className="button" onClick={handleSubmit}>
                         Add Product
+                    </button>
+                </div>
+            )}
+
+            {selectedOption === "Vendor" && (
+                <div>
+                    {["Vendor Name"].map(field => (
+                        <input
+                            key={field}
+                            className="input"
+                            type="text"
+                            placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                            name={field}
+                            value={newVendor[field]}
+                            onChange={handleInputChange}
+                        />
+                    ))}
+
+                    <button className="button" onClick={addVendorToSQL}>
+                        Add Vendor
+                    </button>
+                </div>
+            )}
+            {selectedOption === "Category" && (
+                <div>
+                    {["Category Name"].map(field => (
+                        <input
+                            key={field}
+                            className="input"
+                            type="text"
+                            placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                            name={field}
+                            value={newCategory[field]}
+                            onChange={handleInputChange}
+                        />
+                    ))}
+
+                    <button className="button" onClick={addCategoryToSQL}>
+                        Add Vendor
                     </button>
                 </div>
             )}
