@@ -112,8 +112,26 @@ function App() {
     // Expected output: updates the 'vendors' state with a list of current vendors
     // API call to fetch vendors from sql database
     const fetchVendors = async() => {
-        // API call from main.go
-        // will need to add try catch for error handling
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await fetch("http://localhost:8080/vendors"); //probably a better way to do this
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch vendors');
+            }
+
+            const data = await response.json();
+
+            setVendors(data);
+            console.log(data);
+
+            setLoading(false);
+        } catch (error) {
+            setError('An error occurred while fetching vendors: ' + error.message);
+            setLoading(false);
+        }
         console.log("fetched and updated list of current vendors:");
     };
     
@@ -146,9 +164,9 @@ function App() {
                         onChange={handleInputChange}
                     >
                         <option value="">Select Vendor</option>
-                        {vendors.map((vendor) => (
-                            <option key={vendor.id} value={vendor.id}>
-                                {vendor.name}
+                        {Object.entries(vendors).map(([vendorId, vendorName]) => (
+                            <option key={vendorId} value={vendorId}>
+                                {vendorName}
                             </option>
                         ))}
                     </select>

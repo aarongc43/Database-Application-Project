@@ -49,16 +49,16 @@ func handleVendors(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
-		var vendors []Vendor
+		var vendors []string
 
 		for rows.Next() {
-			var v Vendor
-			err := rows.Scan(&v.Name)
+			var vendorName string
+			err := rows.Scan(&vendorName)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			vendors = append(vendors, v)
+			vendors = append(vendors, vendorName)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
