@@ -6,7 +6,6 @@ function App() {
     const [selectedOption, setSelectedOption] = useState("Products");
     const [newProduct, setNewProduct] = useState({
         category: "",
-        vendor: "",
         productName: "",
         price: "",
         quantity: "",
@@ -32,16 +31,30 @@ function App() {
     // API Call placeholder
     // Expected input
     //   category: string,
-    //   vendor: string,
     //   productName: string,
     //   price: string,
     //   quantity: string,
     //   description: string
     const sendProductToSQL = async (product) => {
-        // API call logic
-        // console.log might need to be replaced by the API call to the backend
-        // because it is interacting with the database directly?
-        console.log("sending product to SQL server:", product);
+        try {
+            const url = 'http://localhost:8080/products';
+    
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', 
+                },
+                body: JSON.stringify(product), 
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Failed to send product data: ${response.status}`);
+            }
+            console.log('Product data sent successfully:', product); //replace with front end banner
+        } catch (error) {
+            console.error('Error sending product data:', error); //replace with front end banner
+            
+        }
     };
 
     // Expected input: vendorName string
@@ -99,8 +112,6 @@ function App() {
 
     // this is to load the initial vendor and category data from the database
     useEffect(() => {
-        // need to be replaced with API calls that get a list of 
-        // vendors and categories
         const fetchInitialData = async () => {
             await fetchVendors();
             await fetchCategories();
@@ -138,8 +149,26 @@ function App() {
     // Expected output: updates the 'categories' state with a list of current categories
     // API call to categories vendors from sql database
     const fetchCategories = async() => {
-        // API call from main.go
-        // will need to add try catch for error handling
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await fetch("http://localhost:8080/categories"); //probably a better way to do this
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch categories');
+            }
+
+            const data = await response.json();
+
+            setCategories(data);
+            console.log(data);
+
+            setLoading(false);
+        } catch (error) {
+            setError('An error occurred while fetching categories: ' + error.message);
+            setLoading(false);
+        }
         console.log("fetched and updated list of current categories:");
     };
 
@@ -178,9 +207,9 @@ function App() {
                         onChange={handleInputChange}
                     >
                         <option value="">Select Category</option>
-                        {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
+                        {Object.entries(categories).map(([categoryId, categoryName]) => (
+                            <option key={categoryId} value={categoryName}>
+                                {categoryName}
                             </option>
                         ))}
                     </select>

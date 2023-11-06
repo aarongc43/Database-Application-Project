@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -16,21 +17,18 @@ type NewProduct struct {
 	Category    string `json:"category"`
 	Vendor      string `json:"vendor"`
 	Name        string `json:"productName"`
-	Price       int    `json:"price"`
-	Quantity    int    `json:"quantity"`
+	Price       string `json:"price"`
+	Quantity    string `json:"quantity"`
 	Description string `json:"description"`
-}
-
-type Vendor struct {
-	Name string `json:"vendors"`
 }
 
 type NewVendor struct {
 	Name string `json:"vendor"`
 }
 
-type CategoryNames struct {
-	Names string `json:"categories"`
+type NewCategory struct {
+	Name   string `json:"category"`
+	Vendor string `json:"vendor"` //need to add this to front end option
 }
 
 type SuccessResponse struct {
@@ -52,13 +50,13 @@ func handleVendors(w http.ResponseWriter, r *http.Request) {
 		var vendors []string
 
 		for rows.Next() {
-			var vendorName string
-			err := rows.Scan(&vendorName)
+			var v string
+			err := rows.Scan(&v)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			vendors = append(vendors, vendorName)
+			vendors = append(vendors, v)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -98,6 +96,80 @@ func handleVendors(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handleCategories(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodGet { //for GET
+		rows, err := db.Query("SELECT Cat_Name FROM categories ORDER BY Cat_Name;")
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+		var categories []string
+
+		for rows.Next() {
+			var c string
+			err := rows.Scan(&c)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			categories = append(categories, c)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(categories)
+
+	} else if r.Method == http.MethodPost { //for POST
+		var request NewCategory
+
+		err := json.NewDecoder(r.Body).Decode(&request)
+
+		if err != nil {
+			writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
+			return
+		}
+
+		getVendorIDstatement, err := db.Prepare("SELECT Vendor_ID FROM vendors WHERE Vendor_Name =?")
+
+		if err != nil {
+			writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
+			return
+		}
+		defer getVendorIDstatement.Close()
+
+		var VendorID int
+		err = getVendorIDstatement.QueryRow(request.Vendor).Scan(&VendorID)
+		if err != nil {
+			writeJSONErrorResponse(w, http.StatusInternalServerError, "Category not found")
+			return
+		}
+
+		categoryInsertStatement, err := db.Prepare("INSERT INTO categories (Cat_Name, Vendor_ID) VALUES (?,?)")
+
+		if err != nil {
+			writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
+			return
+		}
+
+		defer categoryInsertStatement.Close()
+
+		_, err = categoryInsertStatement.Exec(request.Name, request.Vendor)
+		if err != nil {
+			writeJSONErrorResponse(w, http.StatusInternalServerError, "Category insertion error")
+			return
+		}
+
+		response := SuccessResponse{Success: true}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(response)
+
+	} else {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
 func handleProducts(w http.ResponseWriter, r *http.Request) {
 	var request NewProduct
 
@@ -106,6 +178,17 @@ func handleProducts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("Error decoding JSON:", err)
 		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
+		return
+	}
+
+	price, err := strconv.Atoi(request.Price) //casting to int
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	quantity, err := strconv.Atoi(request.Quantity) //casting to int
+	if err != nil {
+		fmt.Println("Error:", err)
 		return
 	}
 
@@ -130,7 +213,7 @@ func handleProducts(w http.ResponseWriter, r *http.Request) {
 	}
 	defer productInsertStatement.Close()
 
-	_, err = productInsertStatement.Exec(request.Name, categoryID, request.Price, request.Quantity, request.Description)
+	_, err = productInsertStatement.Exec(request.Name, categoryID, price, quantity, request.Description)
 	if err != nil {
 		writeJSONErrorResponse(w, http.StatusInternalServerError, "Product insertion error")
 		return
@@ -152,9 +235,9 @@ func handleRequest(corsMiddleware func(http.Handler) http.Handler) {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.Use(corsMiddleware)
 
-	myRouter.HandleFunc("/products", handleProducts).Methods(http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut)
+	myRouter.HandleFunc("/products", handleProducts).Methods(http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodOptions)
 	myRouter.HandleFunc("/vendors", handleVendors).Methods(http.MethodGet, http.MethodPost)
-	//add more endpoints and associated funcs here
+	myRouter.HandleFunc("/categories", handleCategories).Methods(http.MethodGet, http.MethodPost)
 	//add more endpoints and associated funcs here
 	log.Fatal(http.ListenAndServe(":8080", myRouter))
 }
