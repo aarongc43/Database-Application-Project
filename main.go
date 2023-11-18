@@ -96,8 +96,9 @@ func handleVendors(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleCategories(w http.ResponseWriter, r *http.Request) {
+func handleCategoriesDropDown(w http.ResponseWriter, r *http.Request) {
 
+<<<<<<< HEAD
 	/*
 if r.Method == http.MethodGet { //for GET
 rows, err := db.Query("SELECT Cat_Name FROM categories ORDER BY Cat_Name;")
@@ -127,83 +128,85 @@ json.NewEncoder(w).Encode(categories)
 
 	if r.Method == http.MethodGet { //for GET
 <<<<<<< HEAD
+=======
+	vars := mux.Vars(r)
+	vendorName := vars["vendor"]
+	fmt.Println("Vendor Name:", vendorName)
+>>>>>>> upstream/main
 
-		vars := mux.Vars(r)
-		vendorName := vars["vendor"]
-		fmt.Println("Vendor Name:", vendorName)
+	rows, err := db.Query("SELECT Cat_Name FROM categories NATURAL JOIN vendors WHERE Vendor_Name = ?", vendorName)
 
+<<<<<<< HEAD
 		rows, err := db.Query("SELECT Cat_Name FROM categories NATURAL JOIN vendors WHERE Vendor_Name = ?", vendorName)
 =======
 		rows, err := db.Query("select Cat_Name from categories NATURAL JOIN vendors where Vendor_Name = ?", vendorName)
 >>>>>>> aaron
+=======
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+>>>>>>> upstream/main
 
+	var categories []string
+
+	for rows.Next() {
+		var c string
+		err := rows.Scan(&c)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-
-		var categories []string
-
-		for rows.Next() {
-			var c string
-			err := rows.Scan(&c)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			categories = append(categories, c)
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(categories)
-
-	} else if r.Method == http.MethodPost { //for POST
-		var request NewCategory
-
-		err := json.NewDecoder(r.Body).Decode(&request)
-
-		if err != nil {
-			writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
 			return
 		}
-
-		getVendorIDstatement, err := db.Prepare("SELECT Vendor_ID FROM vendors WHERE Vendor_Name =?")
-
-		if err != nil {
-			writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
-			return
-		}
-		defer getVendorIDstatement.Close()
-
-		var VendorID int
-		err = getVendorIDstatement.QueryRow(request.Vendor).Scan(&VendorID)
-		if err != nil {
-			writeJSONErrorResponse(w, http.StatusInternalServerError, "Category not found")
-			return
-		}
-
-		categoryInsertStatement, err := db.Prepare("INSERT INTO categories (Cat_Name, Vendor_ID) VALUES (?,?)")
-
-		if err != nil {
-			writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
-			return
-		}
-
-		defer categoryInsertStatement.Close()
-
-		_, err = categoryInsertStatement.Exec(request.Name, request.Vendor)
-		if err != nil {
-			writeJSONErrorResponse(w, http.StatusInternalServerError, "Category insertion error")
-			return
-		}
-
-		response := SuccessResponse{Success: true}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(response)
-
-	} else {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		categories = append(categories, c)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(categories)
+}
+
+func handleNewCategory(w http.ResponseWriter, r *http.Request) {
+	var request NewCategory
+
+	err := json.NewDecoder(r.Body).Decode(&request)
+
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
+		return
+	}
+
+	getVendorIDstatement, err := db.Prepare("SELECT Vendor_ID FROM vendors WHERE Vendor_Name =?")
+
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
+		return
+	}
+	defer getVendorIDstatement.Close()
+
+	var VendorID int
+	err = getVendorIDstatement.QueryRow(request.Vendor).Scan(&VendorID)
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "Category not found")
+		return
+	}
+
+	categoryInsertStatement, err := db.Prepare("INSERT INTO categories (Cat_Name, Vendor_ID) VALUES (?,?)")
+
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
+		return
+	}
+
+	defer categoryInsertStatement.Close()
+
+	_, err = categoryInsertStatement.Exec(request.Name, request.Vendor)
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "Category insertion error")
+		return
+	}
+
+	response := SuccessResponse{Success: true}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(response)
 }
 
 func handleProducts(w http.ResponseWriter, r *http.Request) {
@@ -274,8 +277,13 @@ func handleRequest(corsMiddleware func(http.Handler) http.Handler) {
 
 	myRouter.HandleFunc("/products", handleProducts).Methods(http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodOptions)
 	myRouter.HandleFunc("/vendors", handleVendors).Methods(http.MethodGet, http.MethodPost)
-	myRouter.HandleFunc("/categories/{vendor}", handleCategories).Methods(http.MethodGet, http.MethodPost)
-	//add more endpoints and associated funcs here
+	myRouter.HandleFunc("/categories/{vendor}", handleCategoriesDropDown).Methods(http.MethodGet, http.MethodOptions)
+	myRouter.HandleFunc("/getCategories", handleNewCategory).Methods(http.MethodPost)
+
+	myRouter.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Not Found:", r.URL.Path)
+		http.NotFound(w, r)
+	})
 	log.Fatal(http.ListenAndServe(":8080", myRouter))
 }
 

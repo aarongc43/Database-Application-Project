@@ -18,6 +18,7 @@ function App() {
     const [categories, setCategories] = useState([]);
     const [newVendor, setNewVendor] = useState({ name: "" });
     const [newCategory, setNewCategory] = useState({ name: ""});
+    const [selectedVendor, setSelectedVendor] = useState("");
     
     const [selectedTab, setSelectedTab] = useState("Customers");
 
@@ -27,6 +28,12 @@ function App() {
     // input change handler for product form
     const handleInputChange = e => {
         const { name, value } = e.target;
+        
+        if (name == "vendor") {
+            // Call fetchCategories with the selected vendor
+            fetchCategories(value);
+            setSelectedVendor(value);
+        }
         setNewProduct(prev => ({ ...prev, [name]: value }));
 
         if (name === "vendor") {
@@ -143,11 +150,16 @@ function App() {
     useEffect(() => {
         const fetchInitialData = async () => {
             await fetchVendors();
+<<<<<<< HEAD
             // await fetchCategories();
+=======
+            if (selectedVendor) {
+                await fetchCategories(selectedVendor);
+            }
+>>>>>>> upstream/main
         };
-       // calling fetch initial data function 
         fetchInitialData();
-    }, []);
+    }, [selectedVendor]);
 
     // Expected output: updates the 'vendors' state with a list of current vendors
     // API call to fetch vendors from sql database
@@ -177,12 +189,12 @@ function App() {
     
     // Expected output: updates the 'categories' state with a list of current categories
     // API call to categories vendors from sql database
-    const fetchCategories = async() => {
+    const fetchCategories = async(vendor) => {
         try {
             setLoading(true);
             setError(null);
-
-            const response = await fetch("http://localhost:8080/categories"); //probably a better way to do this
+            console.log(vendor);
+            const response = await fetch(`http://localhost:8080/categories/${vendor}`);
             
             if (!response.ok) {
                 throw new Error('Failed to fetch categories');
@@ -218,12 +230,12 @@ function App() {
                     <select
                         className="input"
                         name="vendor"
-                        value={newProduct.vendor}
+                        value={selectedVendor}
                         onChange={handleInputChange}
                     >
                         <option value="">Select Vendor</option>
                         {Object.entries(vendors).map(([vendorId, vendorName]) => (
-                            <option key={vendorId} value={vendorId}>
+                            <option key={vendorId} value={vendorName}>
                                 {vendorName}
                             </option>
                         ))}
@@ -234,16 +246,20 @@ function App() {
                         name="category"
                         value={newProduct.category}
                         onChange={handleInputChange}
+<<<<<<< HEAD
                         // disabling category drop down because a vendor needs
                         // to be selected first
                         disabled={!newProduct.vendor}
+=======
+                        disabled={!selectedVendor} // Disable the dropdown if no vendor is selected
+>>>>>>> upstream/main
                     >
                         <option value="">Select Category</option>
-                        {Object.entries(categories).map(([categoryId, categoryName]) => (
-                            <option key={categoryId} value={categoryName}>
+                        {categories.map(categoryName => (
+                            <option key={categoryName} value={categoryName}>
                                 {categoryName}
                             </option>
-                        ))}
+))}
                     </select>
 
                     {["productName", "price", "quantity"].map(field => (
