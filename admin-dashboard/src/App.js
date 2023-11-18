@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
+    
     // state hooks for the components
     const [selectedOption, setSelectedOption] = useState("Products");
     const [newProduct, setNewProduct] = useState({
@@ -34,6 +35,33 @@ function App() {
             setSelectedVendor(value);
         }
         setNewProduct(prev => ({ ...prev, [name]: value }));
+
+        if (name === "vendor") {
+            fetchCategoriesForVendor(value);
+        }
+    };
+
+    const fetchCategoriesForVendor = async (vendorId) => {
+        if (!vendorId) {
+            // the categories drop down list will be empty if a vendor is not
+            // selected
+            setCategories([]);
+        }
+        
+        try {
+            setLoading(true);
+            // this needs to change
+            const response = await fetch(`http://localhost:8080/categories/${newProduct.vendor}`);
+            if (!response.ok) {
+                throw new Error('Failed to "fetch" categories for vendor');
+                }
+            const data = await response.json();
+            setCategories(data);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     // API Call placeholder
@@ -122,9 +150,13 @@ function App() {
     useEffect(() => {
         const fetchInitialData = async () => {
             await fetchVendors();
+<<<<<<< HEAD
+            // await fetchCategories();
+=======
             if (selectedVendor) {
                 await fetchCategories(selectedVendor);
             }
+>>>>>>> upstream/main
         };
         fetchInitialData();
     }, [selectedVendor]);
@@ -214,7 +246,13 @@ function App() {
                         name="category"
                         value={newProduct.category}
                         onChange={handleInputChange}
+<<<<<<< HEAD
+                        // disabling category drop down because a vendor needs
+                        // to be selected first
+                        disabled={!newProduct.vendor}
+=======
                         disabled={!selectedVendor} // Disable the dropdown if no vendor is selected
+>>>>>>> upstream/main
                     >
                         <option value="">Select Category</option>
                         {categories.map(categoryName => (
