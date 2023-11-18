@@ -99,7 +99,12 @@ func handleVendors(w http.ResponseWriter, r *http.Request) {
 func handleCategories(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet { //for GET
-		rows, err := db.Query("SELECT Cat_Name FROM categories ORDER BY Cat_Name;")
+
+		vars := mux.Vars(r)
+		vendorName := vars["vendor"]
+		fmt.Println("Vendor Name:", vendorName)
+
+		rows, err := db.Query("SELECT Cat_Name FROM categories NATURAL JOIN vendors WHERE Vendor_Name = ?", vendorName)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -206,7 +211,7 @@ func handleProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	productInsertStatement, err := db.Prepare("INSERT INTO products (Prod_Name, Category_ID, Prod_Price, Prod_Qty, description) VALUES (?, ?, ?, ?, ?)")
+	productInsertStatement, err := db.Prepare("INSERT INTO products (Prod_Name, Category_ID, Prod_Price, Prod_Qty, Prod_Desc) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
 		return
@@ -237,7 +242,7 @@ func handleRequest(corsMiddleware func(http.Handler) http.Handler) {
 
 	myRouter.HandleFunc("/products", handleProducts).Methods(http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodOptions)
 	myRouter.HandleFunc("/vendors", handleVendors).Methods(http.MethodGet, http.MethodPost)
-	myRouter.HandleFunc("/categories", handleCategories).Methods(http.MethodGet, http.MethodPost)
+	myRouter.HandleFunc("/categories/{vendor}", handleCategories).Methods(http.MethodGet, http.MethodPost)
 	//add more endpoints and associated funcs here
 	log.Fatal(http.ListenAndServe(":8080", myRouter))
 }
@@ -254,6 +259,7 @@ func main() {
 
 	var err error
 	db, err = sql.Open("mysql", cfg.FormatDSN())
+
 	if err != nil {
 		panic(err)
 	}
