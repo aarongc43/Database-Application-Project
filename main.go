@@ -98,13 +98,44 @@ func handleVendors(w http.ResponseWriter, r *http.Request) {
 
 func handleCategories(w http.ResponseWriter, r *http.Request) {
 
+	/*
+if r.Method == http.MethodGet { //for GET
+rows, err := db.Query("SELECT Cat_Name FROM categories ORDER BY Cat_Name;")
+
+if err != nil {
+http.Error(w, err.Error(), http.StatusInternalServerError)
+}
+
+var categories []string
+
+for rows.Next() {
+var c string
+err := rows.Scan(&c)
+if err != nil {
+http.Error(w, err.Error(), http.StatusInternalServerError)
+return
+}
+categories = append(categories, c)
+}
+
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(categories)
+	*/
+
+	vars := mux.Vars(r)
+	vendorName := vars["vendor"]
+
 	if r.Method == http.MethodGet { //for GET
+<<<<<<< HEAD
 
 		vars := mux.Vars(r)
 		vendorName := vars["vendor"]
 		fmt.Println("Vendor Name:", vendorName)
 
 		rows, err := db.Query("SELECT Cat_Name FROM categories NATURAL JOIN vendors WHERE Vendor_Name = ?", vendorName)
+=======
+		rows, err := db.Query("select Cat_Name from categories NATURAL JOIN vendors where Vendor_Name = ?", vendorName)
+>>>>>>> aaron
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -185,6 +216,7 @@ func handleProducts(w http.ResponseWriter, r *http.Request) {
 		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
 		return
 	}
+	fmt.Printf("Received JSON data: %v+\n", request)
 
 	price, err := strconv.Atoi(request.Price) //casting to int
 	if err != nil {
@@ -261,6 +293,7 @@ func main() {
 	db, err = sql.Open("mysql", cfg.FormatDSN())
 
 	if err != nil {
+		fmt.Print("error")
 		panic(err)
 	}
 
