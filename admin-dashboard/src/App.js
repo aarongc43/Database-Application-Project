@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
+    
     // state hooks for the components
     const [selectedOption, setSelectedOption] = useState("Products");
     const [newProduct, setNewProduct] = useState({
+        vendor: "",
         category: "",
         productName: "",
         price: "",

@@ -180,6 +180,7 @@ func handleProducts(w http.ResponseWriter, r *http.Request) {
 		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
 		return
 	}
+	fmt.Printf("Received JSON data: %v+\n", request)
 
 	price, err := strconv.Atoi(request.Price) //casting to int
 	if err != nil {
@@ -206,7 +207,7 @@ func handleProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	productInsertStatement, err := db.Prepare("INSERT INTO products (Prod_Name, Category_ID, Prod_Price, Prod_Qty, description) VALUES (?, ?, ?, ?, ?)")
+	productInsertStatement, err := db.Prepare("INSERT INTO products (Prod_Name, Category_ID, Prod_Price, Prod_Qty, Prod_Desc) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
 		return
@@ -255,6 +256,7 @@ func main() {
 	var err error
 	db, err = sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
+		fmt.Print("error")
 		panic(err)
 	}
 
