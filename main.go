@@ -98,8 +98,35 @@ func handleVendors(w http.ResponseWriter, r *http.Request) {
 
 func handleCategories(w http.ResponseWriter, r *http.Request) {
 
+	/*
+if r.Method == http.MethodGet { //for GET
+rows, err := db.Query("SELECT Cat_Name FROM categories ORDER BY Cat_Name;")
+
+if err != nil {
+http.Error(w, err.Error(), http.StatusInternalServerError)
+}
+
+var categories []string
+
+for rows.Next() {
+var c string
+err := rows.Scan(&c)
+if err != nil {
+http.Error(w, err.Error(), http.StatusInternalServerError)
+return
+}
+categories = append(categories, c)
+}
+
+w.Header().Set("Content-Type", "application/json")
+json.NewEncoder(w).Encode(categories)
+	*/
+
+	vars := mux.Vars(r)
+	vendorName := vars["vendor"]
+
 	if r.Method == http.MethodGet { //for GET
-		rows, err := db.Query("SELECT Cat_Name FROM categories ORDER BY Cat_Name;")
+		rows, err := db.Query("select Cat_Name from categories NATURAL JOIN vendors where Vendor_Name = ?", vendorName)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -238,7 +265,7 @@ func handleRequest(corsMiddleware func(http.Handler) http.Handler) {
 
 	myRouter.HandleFunc("/products", handleProducts).Methods(http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodOptions)
 	myRouter.HandleFunc("/vendors", handleVendors).Methods(http.MethodGet, http.MethodPost)
-	myRouter.HandleFunc("/categories", handleCategories).Methods(http.MethodGet, http.MethodPost)
+	myRouter.HandleFunc("/categories/{vendor}", handleCategories).Methods(http.MethodGet, http.MethodPost)
 	//add more endpoints and associated funcs here
 	log.Fatal(http.ListenAndServe(":8080", myRouter))
 }

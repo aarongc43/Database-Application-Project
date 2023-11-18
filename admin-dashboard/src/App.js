@@ -28,6 +28,33 @@ function App() {
     const handleInputChange = e => {
         const { name, value } = e.target;
         setNewProduct(prev => ({ ...prev, [name]: value }));
+
+        if (name === "vendor") {
+            fetchCategoriesForVendor(value);
+        }
+    };
+
+    const fetchCategoriesForVendor = async (vendorId) => {
+        if (!vendorId) {
+            // the categories drop down list will be empty if a vendor is not
+            // selected
+            setCategories([]);
+        }
+        
+        try {
+            setLoading(true);
+            // this needs to change
+            const response = await fetch(`http://localhost:8080/categories/${newProduct.vendor}`);
+            if (!response.ok) {
+                throw new Error('Failed to "fetch" categories for vendor');
+                }
+            const data = await response.json();
+            setCategories(data);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     // API Call placeholder
@@ -116,7 +143,7 @@ function App() {
     useEffect(() => {
         const fetchInitialData = async () => {
             await fetchVendors();
-            await fetchCategories();
+            // await fetchCategories();
         };
        // calling fetch initial data function 
         fetchInitialData();
@@ -207,6 +234,9 @@ function App() {
                         name="category"
                         value={newProduct.category}
                         onChange={handleInputChange}
+                        // disabling category drop down because a vendor needs
+                        // to be selected first
+                        disabled={!newProduct.vendor}
                     >
                         <option value="">Select Category</option>
                         {Object.entries(categories).map(([categoryId, categoryName]) => (
