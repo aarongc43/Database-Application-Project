@@ -150,13 +150,9 @@ function App() {
     useEffect(() => {
         const fetchInitialData = async () => {
             await fetchVendors();
-<<<<<<< HEAD
-            // await fetchCategories();
-=======
             if (selectedVendor) {
                 await fetchCategories(selectedVendor);
             }
->>>>>>> upstream/main
         };
         fetchInitialData();
     }, [selectedVendor]);
@@ -246,13 +242,7 @@ function App() {
                         name="category"
                         value={newProduct.category}
                         onChange={handleInputChange}
-<<<<<<< HEAD
-                        // disabling category drop down because a vendor needs
-                        // to be selected first
-                        disabled={!newProduct.vendor}
-=======
                         disabled={!selectedVendor} // Disable the dropdown if no vendor is selected
->>>>>>> upstream/main
                     >
                         <option value="">Select Category</option>
                         {categories.map(categoryName => (
