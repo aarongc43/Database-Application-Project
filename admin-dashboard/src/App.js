@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 function App() {
@@ -29,7 +31,7 @@ function App() {
     const handleInputChange = e => {
         const { name, value } = e.target;
         
-        if (name == "vendor") {
+        if (name === "vendor") {
             // Call fetchCategories with the selected vendor
             fetchCategories(value);
             setSelectedVendor(value);
@@ -72,23 +74,37 @@ function App() {
     //   quantity: string,
     //   description: string
     const sendProductToSQL = async (product) => {
+        
+        //const username = prompt("Enter your username:");
+        //const password = prompt("Enter your password:");
+
+        //console.log(username)
+        //console.log(password)
+        
+        
         try {
             const url = 'http://localhost:8080/products';
     
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', 
+                    'Content-Type': 'application/json',
+                    //'Authorization': 'Basic ' + btoa(username + ':' + password), 
                 },
                 body: JSON.stringify(product), 
             });
     
             if (!response.ok) {
-                throw new Error(`Failed to send product data: ${response.status}`);
+                const errorMessage = await response.text();
+                toast.error(`Error sending product data: ${errorMessage}`);
+            } else {
+                toast.success('Product data stored successfully!', {
+                    position: toast.POSITION.TOP_RIGHT,
+                });
             }
-            console.log('Product data sent successfully:', product); //replace with front end banner
+            
         } catch (error) {
-            console.error('Error sending product data:', error); //replace with front end banner
+            toast.error(`Error sending product data: ${error.message}`);
             
         }
     };
@@ -147,7 +163,11 @@ function App() {
     };
 
     // this is to load the initial vendor and category data from the database
+    
     useEffect(() => {
+        
+        
+
         const fetchInitialData = async () => {
             await fetchVendors();
             if (selectedVendor) {
@@ -185,17 +205,23 @@ function App() {
     
     // Expected output: updates the 'categories' state with a list of current categories
     // API call to categories vendors from sql database
-    const fetchCategories = async(vendor) => {
+    const fetchCategories = async(vendorName) => {
+        if (!vendorName) {
+            // the categories drop down list will be empty if a vendor is not
+            // selected
+            setCategories([]);
+        }
+    
         try {
             setLoading(true);
             setError(null);
-            console.log(vendor);
-            const response = await fetch(`http://localhost:8080/categories/${vendor}`);
+            console.log(vendorName);
+            const response = await fetch(`http://localhost:8080/categories/${vendorName}`);
             
             if (!response.ok) {
                 throw new Error('Failed to fetch categories');
             }
-
+            
             const data = await response.json();
 
             setCategories(data);
@@ -252,7 +278,7 @@ function App() {
 ))}
                     </select>
 
-                    {["productName", "price", "quantity"].map(field => (
+                    {["product Name", "price", "quantity"].map(field => (
                         <input
                             key={field}
                             className="input"
@@ -334,6 +360,7 @@ function App() {
                 {loading ? "Loading..." : error ? error : JSON.stringify(tableData)}
             </div>
         </div>
+        <ToastContainer />
         </div>
     );
 }
