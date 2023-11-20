@@ -22,7 +22,7 @@ func BasicAuthMiddleware(next http.Handler) http.Handler {
 
 func authenticateUser(username, password string) bool {
 	var resultUsername string
-	err := db.QueryRow("CALL GetHashyPassy(?, ?)", username, password).Scan(&resultUsername)
+	err := db.QueryRow("CALL AuthenticateUser(?, ?)", username, password).Scan(&resultUsername)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// No rows were returned, meaning the authentication failed
