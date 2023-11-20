@@ -29,7 +29,7 @@ function App() {
     const handleInputChange = e => {
         const { name, value } = e.target;
         
-        if (name == "vendor") {
+        if (name === "vendor") {
             // Call fetchCategories with the selected vendor
             fetchCategories(value);
             setSelectedVendor(value);
@@ -255,7 +255,7 @@ function App() {
                     {["productName", "price", "quantity"].map(field => (
                         <input
                             key={field}
-                            className="input"
+                            className={field === "price" ? "inputPrice" : "input"}
                             type="text"
                             placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                             name={field}
