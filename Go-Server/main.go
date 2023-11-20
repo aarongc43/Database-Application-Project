@@ -17,13 +17,13 @@ func handleRequest(corsMiddleware func(http.Handler) http.Handler) {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.Use(corsMiddleware)
 
-	//protectedRoute := myRouter.PathPrefix("/protected").Subrouter()
-	//protectedRoute.Use(BasicAuthMiddleware)
+	protectedRoute := myRouter.PathPrefix("/protected").Subrouter()
+	protectedRoute.Use(BasicAuthMiddleware)
+	protectedRoute.HandleFunc("/products", addNewProduct).Methods(http.MethodPost, http.MethodOptions)
 
-	myRouter.HandleFunc("/products", addNewProduct).Methods(http.MethodPost, http.MethodOptions)
-	myRouter.HandleFunc("/vendors", handleVendors).Methods(http.MethodGet, http.MethodPost)
-	myRouter.HandleFunc("/categories/{vendor}", handleCategoriesDropDown).Methods(http.MethodGet, http.MethodOptions)
-	myRouter.HandleFunc("/getCategories", handleNewCategory).Methods(http.MethodPost)
+	myRouter.HandleFunc("/vendors", handleVendors)
+	myRouter.HandleFunc("/categories/{vendor}", handleCategoriesDropDown)
+	myRouter.HandleFunc("/getCategories", handleNewCategory)
 
 	myRouter.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Not Found:", r.URL.Path)
@@ -55,7 +55,7 @@ func main() {
 	corsMiddleware := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:3000"}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-		handlers.AllowedHeaders([]string{"Content-Type"}),
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
 	)
 
 	handleRequest(corsMiddleware)

@@ -18,10 +18,9 @@ function App() {
 
     const [vendors, setVendors] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [newVendor, setNewVendor] = useState({ name: "" });
+    const [newVendor, setNewVendor] = useState({ name:""});
     const [newCategory, setNewCategory] = useState({ name: ""});
     const [selectedVendor, setSelectedVendor] = useState("");
-    
     const [selectedTab, setSelectedTab] = useState("Customers");
 
     // dropdown handler
@@ -75,21 +74,20 @@ function App() {
     //   description: string
     const sendProductToSQL = async (product) => {
         
-        //const username = prompt("Enter your username:");
-        //const password = prompt("Enter your password:");
+        const username = prompt("Enter your username:");
+        const password = prompt("Enter your password:");
 
-        //console.log(username)
-        //console.log(password)
-        
+        //console.log(username);
+        //console.log(password);
         
         try {
-            const url = 'http://localhost:8080/products';
+            const url = 'http://localhost:8080/protected/products';
     
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    //'Authorization': 'Basic ' + btoa(username + ':' + password), 
+                    'Authorization': 'Basic ' + btoa(username + ':' + password), 
                 },
                 body: JSON.stringify(product), 
             });
@@ -105,7 +103,6 @@ function App() {
             
         } catch (error) {
             toast.error(`Error sending product data: ${error.message}`);
-            
         }
     };
 
@@ -165,8 +162,6 @@ function App() {
     // this is to load the initial vendor and category data from the database
     
     useEffect(() => {
-        
-        
 
         const fetchInitialData = async () => {
             await fetchVendors();
@@ -278,7 +273,7 @@ function App() {
 ))}
                     </select>
 
-                    {["product Name", "price", "quantity"].map(field => (
+                    {["productName", "price", "quantity"].map(field => (
                         <input
                             key={field}
                             className="input"
