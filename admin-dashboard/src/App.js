@@ -68,6 +68,115 @@ function App() {
         }
     };
 
+<<<<<<< HEAD
+=======
+    // API Call placeholder
+    // Expected input
+    //   category: string,
+    //   productName: string,
+    //   price: string,
+    //   quantity: string,
+    //   description: string
+    const sendProductToSQL = async (product) => {
+        
+        const username = prompt("Enter your username:");
+        const password = prompt("Enter your password:");
+
+        //console.log(username);
+        //console.log(password);
+        
+        try {
+            const url = 'http://localhost:8080/protected/products';
+    
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa(username + ':' + password), 
+                },
+                body: JSON.stringify(product), 
+            });
+    
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                toast.error(`Error sending product data: ${errorMessage}`);
+            } else {
+                toast.success('Product data stored successfully!', {
+                    position: toast.POSITION.TOP_RIGHT,
+                });
+            }
+            
+        } catch (error) {
+            toast.error(`Error sending product data: ${error.message}`);
+        }
+    };
+
+    // Expected input: vendorName string
+    const addVendorToSQL = async (vendorName) => {
+        const username = prompt("Enter your username:");
+        const password = prompt("Enter your password:");
+
+        //console.log(username);
+        //console.log(password);
+        
+        try {
+            const url = 'http://localhost:8080/protected/addVendor';
+    
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa(username + ':' + password), 
+                },
+                body: JSON.stringify(vendorName), 
+            });
+    
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                toast.error(`Error sending product data: ${errorMessage}`);
+            } else {
+                toast.success('Product data stored successfully!', {
+                    position: toast.POSITION.TOP_RIGHT,
+                });
+            }
+            
+        } catch (error) {
+            toast.error(`Error sending product data: ${error.message}`);
+        }
+        console.log("sending vendor to SQL server:", vendorName);
+    };
+
+    
+    // Expected input: categoryName string
+    const addCategoryToSQL = async (categoryName) => {
+        // API call to main.go to add category
+        // console.log might need to be replaced by the API call to the backend
+        // because it is interacting with the database directly?
+        console.log("sending category to SQL server:", categoryName);
+    };
+    /*
+    POST  payload
+        - catergory: string
+        - vendor: string
+        - productName: string
+        - price: int
+        - quantity: int
+        - description: text
+     */
+
+    // form submission handler for products
+    const handleSubmit = () => {
+        sendProductToSQL(newProduct);
+        console.log("New Product:", newProduct);
+    }
+
+    // for managing state functions, still learning states so they may be wrong
+    const [tableData, setTableData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    // fetch data for a given table from sql database
+>>>>>>> upstream/main
     const fetchTableData = async (tableName) => {
         setLoading(true);
         setError(null);

@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/go-sql-driver/mysql"
@@ -15,21 +14,25 @@ var db *sql.DB
 
 func handleRequest(corsMiddleware func(http.Handler) http.Handler) {
 	myRouter := mux.NewRouter().StrictSlash(true)
-	myRouter.Use(corsMiddleware)
 
 	protectedRoute := myRouter.PathPrefix("/protected").Subrouter()
 	protectedRoute.Use(BasicAuthMiddleware)
-	protectedRoute.HandleFunc("/products", addNewProduct).Methods(http.MethodPost, http.MethodOptions)
+	protectedRoute.Use(corsMiddleware)
+	protectedRoute.HandleFunc("/products", addNewProduct)
+	protectedRoute.HandleFunc("/addVendor", addNewVendor)
 
-	myRouter.HandleFunc("/vendors", handleVendors)
-	myRouter.HandleFunc("/categories/{vendor}", handleCategoriesDropDown)
-	myRouter.HandleFunc("/getCategories", handleNewCategory)
+	myRouter.Use(corsMiddleware)
+	myRouter.HandleFunc("/vendors", getAllVendors)
+	myRouter.HandleFunc("/categories/{vendor}", categoriesDropDown)
+	myRouter.HandleFunc("/categories", addNewCategory)
+	myRouter.HandleFunc("/getProducts", getAllProducts)
 
 	myRouter.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Not Found:", r.URL.Path)
 		http.NotFound(w, r)
 	})
-	log.Fatal(http.ListenAndServe(":8080", myRouter))
+
+	http.ListenAndServe(":8080", myRouter)
 }
 
 func main() {
