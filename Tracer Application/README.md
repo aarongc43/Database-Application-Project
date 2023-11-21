@@ -1,0 +1,1 @@
+This contains a simple tracer program for an initial example of inserting a new product into a mySQL database using Vanilla JS/html/css and a golang backend server.
