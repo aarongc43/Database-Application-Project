@@ -107,11 +107,38 @@ function App() {
     };
 
     // Expected input: vendorName string
-    const addVendorToSQL = async (vendorName) => {
-        // API call to main.go to add vendor
-        // console.log might need to be replaced by the API call to the backend
-        // because it is interacting with the database directly?
-        console.log("sending vendor to SQL server:", vendorName);
+    const addVendorToSQL = async (vendor) => {
+        const username = prompt("Enter your username:");
+        const password = prompt("Enter your password:");
+
+        //console.log(username);
+        //console.log(password);
+        
+        try {
+            const url = 'http://localhost:8080/protected/addVendor';
+    
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa(username + ':' + password), 
+                },
+                body: JSON.stringify(vendor), 
+            });
+    
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                toast.error(`Error sending product data: ${errorMessage}`);
+            } else {
+                toast.success('Product data stored successfully!', {
+                    position: toast.POSITION.TOP_RIGHT,
+                });
+            }
+            
+        } catch (error) {
+            toast.error(`Error sending product data: ${error.message}`);
+        }
+        console.log("sending vendor to SQL server:", vendor);
     };
 
     

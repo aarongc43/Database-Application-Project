@@ -8,65 +8,61 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func handleVendors(w http.ResponseWriter, r *http.Request) {
+func getVendors(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == http.MethodGet {
-		rows, err := db.Query("SELECT Vendor_Name FROM vendors ORDER BY Vendor_Name;")
+	rows, err := db.Query("SELECT Vendor_Name FROM vendors ORDER BY Vendor_Name;")
 
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	var vendors []string
+
+	for rows.Next() {
+		var v string
+		err := rows.Scan(&v)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-
-		var vendors []string
-
-		for rows.Next() {
-			var v string
-			err := rows.Scan(&v)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			vendors = append(vendors, v)
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(vendors)
-
-	} else if r.Method == http.MethodPost {
-		var request NewVendor
-
-		err := json.NewDecoder(r.Body).Decode(&request)
-
-		if err != nil {
-			writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
 			return
 		}
-
-		vendorinsertstatement, err := db.Prepare("INSERT INTO vendors (Vendor_Name) values (?);")
-
-		if err != nil {
-			writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
-			return
-		}
-
-		_, err = vendorinsertstatement.Exec(&request.Name)
-
-		if err != nil {
-			writeJSONErrorResponse(w, http.StatusInternalServerError, "Product insertion error")
-			return
-		}
-
-		response := SuccessResponse{Success: true}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(response)
-
-	} else {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		vendors = append(vendors, v)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(vendors)
 }
 
-func handleCategoriesDropDown(w http.ResponseWriter, r *http.Request) {
+func addNewVendor(w http.ResponseWriter, r *http.Request) {
+	var request NewVendor
+
+	err := json.NewDecoder(r.Body).Decode(&request)
+
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
+		return
+	}
+
+	vendorinsertstatement, err := db.Prepare("INSERT INTO vendors (Vendor_Name) values (?);")
+
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
+		return
+	}
+
+	_, err = vendorinsertstatement.Exec(&request.Name)
+
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "Product insertion error")
+		return
+	}
+
+	response := SuccessResponse{Success: true}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(response)
+}
+
+func categoriesDropDown(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	vendorName := vars["vendor"]
@@ -94,7 +90,7 @@ func handleCategoriesDropDown(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(categories)
 }
 
-func handleNewCategory(w http.ResponseWriter, r *http.Request) {
+func addNewCategory(w http.ResponseWriter, r *http.Request) {
 	var request NewCategory
 
 	err := json.NewDecoder(r.Body).Decode(&request)
