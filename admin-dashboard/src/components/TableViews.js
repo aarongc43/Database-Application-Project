@@ -13,7 +13,8 @@ const TableButton = ({name, isSelected, onClick}) => (
 // component to render all table view buttons
 const TableViews = ({selectedTab, handleTabChange}) => {
     // list of tables we want to for from sql
-    const tables = ["Products", "Vendors"];
+    const tables = ["Products", "Vendors", "categories", 
+        "customers", "employee", "logincreds", "orderdetails", "orders"]; 
 
     return(
         <div className="tab-buttons">
@@ -30,3 +31,4 @@ const TableViews = ({selectedTab, handleTabChange}) => {
 };
 
 export default TableViews;
+
