@@ -107,7 +107,7 @@ function App() {
     };
 
     // Expected input: vendorName string
-    const addVendorToSQL = async (vendor) => {
+    const addVendorToSQL = async (vendorName) => {
         const username = prompt("Enter your username:");
         const password = prompt("Enter your password:");
 
@@ -123,7 +123,7 @@ function App() {
                     'Content-Type': 'application/json',
                     'Authorization': 'Basic ' + btoa(username + ':' + password), 
                 },
-                body: JSON.stringify(vendor), 
+                body: JSON.stringify(vendorName), 
             });
     
             if (!response.ok) {
@@ -138,7 +138,7 @@ function App() {
         } catch (error) {
             toast.error(`Error sending product data: ${error.message}`);
         }
-        console.log("sending vendor to SQL server:", vendor);
+        console.log("sending vendor to SQL server:", vendorName);
     };
 
     
