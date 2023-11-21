@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
-import ''
+import './TableViews.js';
 
 function App() {
     
@@ -151,8 +151,14 @@ function App() {
     
     // restrict price input
     const handlePriceInputChange = (e) => {
-        const value = e.target.value.replace(/[^\d.]/g, '');
-        setPriceInput(value);
+        const value = e.target.value.replace(/^\$/, '');
+        if (/^\d*(\.\d{0,2})?$/.test(value) || value === '') {
+            setPriceInput(value);
+            setNewProduct(prevProduct => ({
+                ...prevProduct,
+                price: value
+            }));
+        }
     };
 
     // form submission handler for products
@@ -183,13 +189,13 @@ function App() {
         const username = prompt("Enter your username:");
         const password = prompt("Enter your password:");
 
-        const santizedProduct = {
+        const sanitizedProduct = {
             ...product,
             price: product.price.replace(/[^\d.]/g, ''),
         };
 
-        //console.log(username);
-        //console.log(password);
+        console.log(username);
+        console.log(password);
         
         try {
             const url = 'http://localhost:8080/protected/products';
@@ -200,7 +206,7 @@ function App() {
                     'Content-Type': 'application/json',
                     'Authorization': 'Basic ' + btoa(username + ':' + password), 
                 },
-                body: JSON.stringify(santizedProduct), 
+                body: JSON.stringify(sanitizedProduct), 
             });
     
             if (!response.ok) {
@@ -235,7 +241,10 @@ function App() {
     };
 
     const formatPriceDisplay = (value) => {
-        return value ? `$${value}` : '';
+        if (value.startsWith('$')) {
+            return value;
+        }
+        return `$${value}`;
     };
 
 
@@ -371,21 +380,6 @@ function App() {
         </div>
 
         <div className="tab-container">
-            <div className="tab-buttons">
-                {["Customers", "Address", "Payments", "Orders", "Order Details", "Products", "Categories", "Vendors", "Employess", "Login Creds"].map(table => (
-                    <button
-                        key={table}
-                        className={`tab-button ${selectedTab === table ? "active" : ""}`}
-                        onClick={() => handleTabChange(table)}
-                    >
-                        {table}
-                    </button>
-                ))}
-            </div>
-
-            <div>
-                {loading ? "Loading..." : error ? error : JSON.stringify(tableData)}
-            </div>
         </div>
         <ToastContainer />
         </div>
