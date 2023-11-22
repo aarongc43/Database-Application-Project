@@ -13,7 +13,8 @@ import {
     fetchCategoriesForVendor,
     sendProductToSQL,
     addVendorToSQL,
-    addCategoryToSQL
+    addCategoryToSQL,
+    editProductSQL
 } from './components/api.js';
 
 function App() {
@@ -31,6 +32,9 @@ function App() {
     const [tableData, setTableData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [currentProduct, setCurrentProduct] = useState(null);
+    const [editingProductId, setEditingProductId] = useState(null);
 
     // go server is seeing this as an object
     const initialNewProductState = {
@@ -165,6 +169,33 @@ function App() {
         }
     };
 
+    // Function to handle editing a product
+    const editProduct = (product) => {
+        setCurrentProduct(product);
+        setIsEditModalOpen(true);
+    };
+
+    // Function to close the edit modal
+    const closeEditModal = () => {
+        setIsEditModalOpen(false);
+        setCurrentProduct(null);
+    };
+
+    // Function to handle the submission of the edited product
+    const submitEditProduct = async (editedProduct) => {
+        const credentials = getCredentials();
+        try {
+            await editProductSQL(editedProduct, credentials); 
+            toast.success('Product updated successfully!');
+            closeEditModal();
+            // Refresh the products list
+            const updatedProducts = await fetchProducts();
+            setTableData(updatedProducts);
+        } catch (error) {
+            toast.error(`Error updating product: ${error.message}`);
+        }
+    };
+
     const getCredentials = () => {
         const username = prompt("Enter your username:");
         const password = prompt("Enter your password:");
@@ -228,7 +259,12 @@ function App() {
                 />
             </div>
             <div className="table-container">
-                {selectedTab === 'Products' && <ProductTable products={tableData} />}
+                {selectedTab === 'Products' && <ProductTable 
+                    products={tableData} 
+                    onEditSubmit={submitEditProduct}
+                    editingProductId={editingProductId}
+                    setEditingProductId={setEditingProductId}
+                    editProduct={editProduct} />}
             </div>
             <ToastContainer />
         </div>

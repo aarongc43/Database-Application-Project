@@ -3,9 +3,10 @@ import PropTypes from 'prop-types';
 import { Checkbox, Button, Paper, TableContainer, Typography } from '@mui/material';
 import '../App.css';
 
-function ProductTable({ products, editProduct, deleteProduct }) {
+function ProductTable({ products, onEditSubmit, editingProductId, setEditingProductId, editProduct, deleteProduct }) {
     // State to keep track of selected products
     const [selectedProducts, setSelectedProducts] = useState([]);
+    const [editFormData, setEditFormData] = useState({});
 
     // Determines if a productId is selected
     const isSelected = (productID) => selectedProducts.some((p) => p.productID === productID);
@@ -30,9 +31,40 @@ function ProductTable({ products, editProduct, deleteProduct }) {
 
     // Edit handler
     const handleEdit = () => {
-        if (editProduct && typeof editProduct === 'function') {
-            editProduct(selectedProducts);
-        }
+        if (isAnyProductSelected && selectedProducts.length === 1) {
+        // Assuming you want to edit only one product at a time
+        const productToEdit = selectedProducts[0];
+        handleEditClick(productToEdit);
+    } else {
+        // Handle the case where no product is selected or multiple products are selected
+        // Maybe show a warning using toast
+    }
+    };
+
+    const handleEditClick = (product) => {
+    setEditingProductId(product.productID);
+    setEditFormData({
+        productID: product.productID,
+        productName: product.productName,
+        price: product.price,
+        quantity: product.quantity,
+        description: product.description,
+    });
+  };
+
+    const handleCancelClick = () => {
+    setEditingProductId(null);
+  };
+
+    const handleFormChange = (event) => {
+        const { name, value } = event.target;
+    setEditFormData({ ...editFormData, [name]: value });
+  };
+
+    const handleSaveClick = () => {
+        console.log('Edit form data to submit:', editFormData);
+        onEditSubmit(editFormData);
+        setEditingProductId(null);
     };
 
     // Delete handler
@@ -92,8 +124,61 @@ function ProductTable({ products, editProduct, deleteProduct }) {
                 </thead>
                 <tbody>
                     {products.length > 0 ? (
-                        products.map((product) => (
-                            <tr key={product.productID}>
+    products.map((product) => {
+      if (editingProductId === product.productID) {
+        // Render the editable row
+        return (
+          <tr key={product.productID}>
+            <td>
+              <button onClick={handleSaveClick}>Confirm</button>
+              <button onClick={handleCancelClick}>Cancel</button>
+            </td>
+            <td>
+              <input
+                type="text"
+                name="productID"
+                value={editFormData.productID}
+                onChange={handleFormChange}
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                name="productName"
+                value={editFormData.productName}
+                onChange={handleFormChange}
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                name="price"
+                value={editFormData.price}
+                onChange={handleFormChange}
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                name="quantity"
+                value={editFormData.quantity}
+                onChange={handleFormChange}
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                name="description"
+                value={editFormData.description}
+                onChange={handleFormChange}
+              />
+            </td>
+          </tr>
+        );
+      } else {
+        // Render the regular row
+        return (
+          <tr key={product.productID}>
                                 <td>
                                     <Checkbox
                                         className="productCheckbox"
@@ -113,7 +198,9 @@ function ProductTable({ products, editProduct, deleteProduct }) {
                                 <td data-label="Quantity" align="right">{product.quantity}</td>
                                 <td data-label="Description">{product.description}</td>
                             </tr>
-                        ))
+                            );
+                        }
+                        })
                     ) : (
                             <tr>
                                 <td colSpan={5} align="center" style={{ padding: '20px', color: '#F3DE8A' }}>

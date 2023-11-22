@@ -16,7 +16,7 @@ body {
 
 .container {
     width: 80%;
-    max-width: 800px;
+    max-width: 1100px;
     background-color: #383c44; 
     padding: 20px;
     border-radius: 10px;
@@ -100,7 +100,7 @@ button:hover {
 
 .tab-container {
     width: 80%;
-    max-width: 800px;
+    max-width: 1100px;
     background-color: #383c44; /* Slightly lighter shade for the button section */
     padding: 20px;
     border-radius: 10px;
@@ -126,7 +126,7 @@ select {
 
 .table-container {
     width: 80%;
-    max-width: 800px;
+    max-width: 1100px;
     max-height: 400px;
     overflow-y: auto;
     overflow-x: auto;
