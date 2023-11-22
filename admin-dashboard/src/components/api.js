@@ -35,11 +35,9 @@ export const fetchProducts = async () => {
 };
 
 export const fetchTableData = async (tableName) => {
-  const url = `${API_BASE_URL}/${tableName}`;
-  const response = await fetch(url);
-
+  const response = `${API_BASE_URL}/get${tableName}`;
   return handleResponse(response);
-}
+};
 
 // submissions to backend
 export const sendProductToSQL = async (product, credentials) => {
@@ -55,21 +53,6 @@ export const sendProductToSQL = async (product, credentials) => {
       body: JSON.stringify(product), 
     });
 
-  return handleResponse(response);
-};
-
-export const sendVendorToSQL = async (vendor, credentials) => {
-  
-  const url = `${API_BASE_URL}/protected/vendors`;
-
-  const response = await fetch(url,  {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Basic ' + btoa(`${credentials.username}:${credentials.password}`), 
-    },
-    body: JSON.stringify(vendor),
-  });
   return handleResponse(response);
 };
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import {Table, TableBody, TableCell, TableHead,TableRow} from '@mui/material';
 
 // button component
 const TableButton = ({name, isSelected, onClick}) => (
@@ -13,8 +14,8 @@ const TableButton = ({name, isSelected, onClick}) => (
 // component to render all table view buttons
 const TableViews = ({selectedTab, handleTabChange}) => {
     // list of tables we want to for from sql
-    const tables = ["Products", "Vendors", "categories", 
-        "customers", "employee", "logincreds", "orderdetails", "orders"]; 
+    const tables = ["Products", "Vendors", 
+        "Customers", "Employee", "Logincreds", "Orderdetails", "Orders"]; 
 
     return(
         <div className="tab-buttons">

@@ -4,6 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import TableViews from './components/TableViews.js';
 import FormsUI from './components/FormsUI.js';
+import ProductTable from './components/ProductTable.js';
 import {
     fetchVendors, 
     fetchCategories, 
@@ -136,12 +137,27 @@ function App() {
         const credentials = getCredentials();
 
         try {
-            const response = await sendProductToSQL(newProduct, credentials);
+            await sendProductToSQL(newProduct, credentials);
 
             toast.success('Product added successfully!', {
                 position: toast.POSITION.TOP_RIGHT,
             });
             setNewProduct(initialNewProductState);
+        } catch (error) {
+            toast.error(`Error sending product data: ${error.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    // handles tab switching logic and data fetching based on a selected tab
+    const handleTabChange = async (tableName) => {
+        setSelectedTab(tableName);
+        setLoading(true);
+        try {
+            const data = await fetchProducts();
+            console.log(data);
+            setTableData(data);
         } catch (error) {
             toast.error(`Error sending product data: ${error.message}`);
         } finally {
@@ -165,11 +181,6 @@ function App() {
         setPriceInput(formatPriceDisplay(priceInput));
     };
 
-    // handles tab switching logic and data fetching based on a selected tab
-    const handleTabChange = (table) => {
-        setSelectedTab(table);
-        fetchTableData(table.toLowerCase());
-    };
 
     const formatPriceDisplay = (value) => {
         if (value.startsWith('$')) {
@@ -215,6 +226,7 @@ function App() {
                     selectedTab={selectedTab}
                     handleTabChange={handleTabChange}
                 />
+                {selectedTab === 'Products' && <ProductTable products={tableData} />}
             </div>
             <ToastContainer />
         </div>

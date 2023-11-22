@@ -119,3 +119,71 @@ select {
     background-color: #333745;
 }
 
+/* Additional styles for Table */
+.ProductsTable {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.ProductsTable th {
+  background-color: #484e58; /* Slightly darker than container for contrast */
+  color: #F3DE8A;
+  font-weight: bold;
+  padding: 12px 15px;
+}
+
+.ProductsTable td {
+  padding: 10px 15px;
+  color: #F3DE8A;
+}
+
+.ProductsTable tbody tr:nth-of-type(odd) {
+  background-color: #333745;
+}
+
+.ProductsTable tbody tr:nth-of-type(even) {
+  background-color: #2e313a;
+}
+
+.ProductsTable tbody tr:hover {
+  background-color: #424752; /* Slightly lighter to indicate hover */
+}
+
+.ProductsTable td, .ProductsTable th {
+  border: 1px solid #4f5564; /* Subtle borders for definition */
+  text-align: left;
+}
+
+@media screen and (max-width: 600px) {
+  .ProductsTable thead {
+    display: none; /* Hide headers on small screens */
+  }
+
+  .ProductsTable, .ProductsTable tbody, .ProductsTable tr, .ProductsTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .ProductsTable tr {
+    margin-bottom: 15px;
+  }
+
+  .ProductsTable td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+  }
+
+  .ProductsTable td::before {
+    /* Add content from headers */
+    content: attr(data-label);
+    position: absolute;
+    left: 15px;
+    width: 50%;
+    padding-right: 15px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
+  }
+}
+
