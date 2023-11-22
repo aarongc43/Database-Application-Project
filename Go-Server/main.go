@@ -24,7 +24,8 @@ func handleRequest(corsMiddleware func(http.Handler) http.Handler) {
 	myRouter.Use(corsMiddleware)
 	myRouter.HandleFunc("/vendors", getAllVendors)
 	myRouter.HandleFunc("/categories/{vendor}", categoriesDropDown)
-	myRouter.HandleFunc("/categories", addNewCategory)
+	myRouter.HandleFunc("/addCategory", addNewCategory)
+	myRouter.HandleFunc("/getCategories", getAllCategories)
 	myRouter.HandleFunc("/getProducts", getAllProducts)
 
 	myRouter.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -55,6 +55,30 @@ func getAllVendors(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(vendors)
 }
 
+func getAllCategories(w http.ResponseWriter, r *http.Request) {
+
+	rows, err := db.Query("SELECT Category_ID, Cat_Name FROM categories ORDER BY Cat_Name;")
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	var categories []string
+
+	for rows.Next() {
+		var v string
+		err := rows.Scan(&v)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		categories = append(categories, v)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(categories)
+}
+
 func addNewVendor(w http.ResponseWriter, r *http.Request) {
 	var request NewVendor
 
@@ -133,16 +157,27 @@ func addNewCategory(w http.ResponseWriter, r *http.Request) {
 
 func addNewProduct(w http.ResponseWriter, r *http.Request) {
 	var request NewProduct
+	var name string
 
 	err := json.NewDecoder(r.Body).Decode(&request)
-
-	if err := newProductValidation(request); err != nil {
-		writeJSONErrorResponse(w, http.StatusBadRequest, err.Error())
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
 		return
 	}
 
-	if err != nil {
-		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
+	row := db.QueryRow("SELECT Prod_Name FROM products WHERE Prod_Name = ?", request.Name).Scan(&name)
+	if row != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
+		return
+	}
+
+	if name == request.Name {
+		writeJSONErrorResponse(w, http.StatusBadRequest, "Product already exists")
+		return
+	}
+
+	if err := newProductValidation(request); err != nil {
+		writeJSONErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
