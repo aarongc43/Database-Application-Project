@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -157,7 +158,6 @@ func addNewCategory(w http.ResponseWriter, r *http.Request) {
 
 func addNewProduct(w http.ResponseWriter, r *http.Request) {
 	var request NewProduct
-	var name string
 
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
@@ -165,13 +165,8 @@ func addNewProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	row := db.QueryRow("SELECT Prod_Name FROM products WHERE Prod_Name = ?", request.Name).Scan(&name)
-	if row != nil {
-		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
-		return
-	}
-
-	if name == request.Name {
+	err = db.QueryRow("SELECT Prod_Name FROM products WHERE Prod_Name = ?", request.Name).Scan()
+	if err != sql.ErrNoRows {
 		writeJSONErrorResponse(w, http.StatusBadRequest, "Product already exists")
 		return
 	}
@@ -183,7 +178,7 @@ func addNewProduct(w http.ResponseWriter, r *http.Request) {
 
 	productInsertStatement, err := db.Prepare("CALL InsertNewProduct(?, ?, ?, ?, ?)")
 	if err != nil {
-		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL procedure error")
 		return
 	}
 	defer productInsertStatement.Close()
