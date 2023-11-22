@@ -67,11 +67,19 @@ function ProductTable({ products, onEditSubmit, editingProductId, setEditingProd
         setEditingProductId(null);
     };
 
-    // Delete handler
     const handleDelete = () => {
-        if (deleteProduct && typeof deleteProduct === 'function') {
+        if (selectedProducts.length > 0) {
             deleteProduct(selectedProducts);
+        } else {
+            // Show warning or error if no product is selected
         }
+    };
+
+    const editableFieldStyle = {
+        backgroundColor: "#4B5267",
+        border: "1px solid #ccc",
+        borderRadius: "4px",
+        padding: "8px",
     };
 
     return (
@@ -101,14 +109,16 @@ function ProductTable({ products, onEditSubmit, editingProductId, setEditingProd
                     className="productTableButton" 
                     variant="contained" 
                     color="primary" 
-                    onClick={handleEdit} disabled={!isAnyProductSelected}>
+                    onClick={handleEdit} 
+                    disabled={!isAnyProductSelected}>
                     Edit
                 </Button>
                 <Button 
                     className="productTableButton" 
                     variant="contained" 
                     color="secondary" 
-                    onClick={handleDelete} disabled={!isAnyProductSelected}>
+                    onClick={handleDelete} 
+                    disabled={!isAnyProductSelected}>
                     Delete
                 </Button>
             </div>
@@ -139,6 +149,7 @@ function ProductTable({ products, onEditSubmit, editingProductId, setEditingProd
                 name="productID"
                 value={editFormData.productID}
                 onChange={handleFormChange}
+                style={editableFieldStyle}
               />
             </td>
             <td>
@@ -147,6 +158,7 @@ function ProductTable({ products, onEditSubmit, editingProductId, setEditingProd
                 name="productName"
                 value={editFormData.productName}
                 onChange={handleFormChange}
+                style={editableFieldStyle}
               />
             </td>
             <td>
@@ -155,6 +167,7 @@ function ProductTable({ products, onEditSubmit, editingProductId, setEditingProd
                 name="price"
                 value={editFormData.price}
                 onChange={handleFormChange}
+                style={editableFieldStyle}
               />
             </td>
             <td>
@@ -163,6 +176,7 @@ function ProductTable({ products, onEditSubmit, editingProductId, setEditingProd
                 name="quantity"
                 value={editFormData.quantity}
                 onChange={handleFormChange}
+                style={editableFieldStyle}
               />
             </td>
             <td>
@@ -171,12 +185,13 @@ function ProductTable({ products, onEditSubmit, editingProductId, setEditingProd
                 name="description"
                 value={editFormData.description}
                 onChange={handleFormChange}
+                style={editableFieldStyle}
               />
             </td>
           </tr>
         );
       } else {
-        // Render the regular row
+
         return (
           <tr key={product.productID}>
                                 <td>

@@ -14,7 +14,8 @@ import {
     sendProductToSQL,
     addVendorToSQL,
     addCategoryToSQL,
-    editProductSQL
+    editProductSQL,
+    deleteProductSQL
 } from './components/api.js';
 
 function App() {
@@ -68,6 +69,7 @@ function App() {
                 }
             } catch (error) {
                 setError(error.message);
+                toast.error(`Error occurred: ${error.message}`);
             } finally {
                 if (isMounted) {
                     setLoading(false);
@@ -220,6 +222,24 @@ function App() {
         return `$${value}`;
     };
 
+    const handleDelete = async (selectedProducts) => {
+        if (!selectedProducts.length || !window.confirm('Are you sure you want to delete the selected products?')) {
+            return;
+        }
+
+        const credentials = getCredentials();
+        try {
+            for (const product of selectedProducts) {
+                await deleteProductSQL(product.productID, credentials); // Assuming deleteProductSQL is your API call function
+            }
+
+            toast.success('Product(s) deleted successfully!');
+            const updatedProducts = await fetchProducts(); // fetch the updated list of products
+            setTableData(updatedProducts);
+        } catch (error) {
+            toast.error(`Error deleting product: ${error.message}`);
+        }
+    };
 
     return (
         <div className="app-container">
@@ -264,7 +284,9 @@ function App() {
                     onEditSubmit={submitEditProduct}
                     editingProductId={editingProductId}
                     setEditingProductId={setEditingProductId}
-                    editProduct={editProduct} />}
+                    editProduct={editProduct} 
+                    deleteProduct={handleDelete}
+                   />} 
             </div>
             <ToastContainer />
         </div>

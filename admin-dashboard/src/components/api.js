@@ -99,3 +99,15 @@ export const editProductSQL = async (product, credentials) => {
   return handleResponse(response);
 };
 
+export const deleteProductSQL = async (productID, credentials) => {
+  
+  const url = `${API_BASE_URL}/protected/products/${productID}`;
+
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      'Authorization' : 'Basic ' + btoa(`${credentials.username}:${credentials.password}`),  
+    },
+  });
+  return handleResponse(response);
+};
