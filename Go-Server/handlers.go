@@ -85,34 +85,6 @@ func addNewVendor(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func categoriesDropDown(w http.ResponseWriter, r *http.Request) {
-
-	vars := mux.Vars(r)
-	vendorName := vars["vendor"]
-	fmt.Println("Vendor Name:", vendorName)
-
-	rows, err := db.Query("SELECT Cat_Name FROM categories NATURAL JOIN vendors WHERE Vendor_Name = ?", vendorName)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	var categories []string
-
-	for rows.Next() {
-		var c string
-		err := rows.Scan(&c)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		categories = append(categories, c)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(categories)
-}
-
 func addNewCategory(w http.ResponseWriter, r *http.Request) {
 	var request NewCategory
 
@@ -190,7 +162,35 @@ func addNewProduct(w http.ResponseWriter, r *http.Request) {
 	writeJSONSuccessResponse(w, http.StatusCreated, "Product Successfully Added")
 }
 
-func writeJSONErrorResponse(w http.ResponseWriter, statusCode int, errMessage string) { //method to reduce code repetition when returning a JSON formatted error response
+func categoriesDropDown(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	vendorName := vars["vendor"]
+	fmt.Println("Vendor Name:", vendorName)
+
+	rows, err := db.Query("SELECT Cat_Name FROM categories NATURAL JOIN vendors WHERE Vendor_Name = ?", vendorName)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	var categories []string
+
+	for rows.Next() {
+		var c string
+		err := rows.Scan(&c)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		categories = append(categories, c)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(categories)
+}
+
+func writeJSONErrorResponse(w http.ResponseWriter, statusCode int, errMessage string) {
 	response := SuccessResponse{Success: false, Error: errMessage}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
