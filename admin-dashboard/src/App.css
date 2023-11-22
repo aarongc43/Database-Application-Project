@@ -24,6 +24,11 @@ body {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
 }
 
+.container.MuiPaper-root { 
+    box-shadow: none; /* Removes the shadow/border */
+    background-color: #383c44; /* Ensures the background color is consistent */
+}
+
 input, select, textarea {
     width: 100%;
     padding: 10px;
@@ -119,6 +124,32 @@ select {
     background-color: #333745;
 }
 
+.table-container {
+    width: 80%;
+    max-width: 800px;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: auto;
+    background-color: #383c44; /* Matches the styling of .container */
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px auto; /* Centers the table and adds vertical spacing */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Ensures table fills the container and inherits the color for consistency */
+.table-container .ProductsTable {
+    width: 100%;
+    color: #F3DE8A; /* Inherits the color from body for consistency */
+}
+
+/* Additional responsive styling, if needed */
+@media screen and (max-width: 600px) {
+    .table-container, .ProductsTable, .ProductsTable tbody, .ProductsTable tr, .ProductsTable td {
+        width: 100%; /* Ensures table responsiveness */
+    }
+}
+
 /* Additional styles for Table */
 .ProductsTable {
   border-collapse: collapse;
@@ -154,6 +185,12 @@ select {
   text-align: left;
 }
 
+.custom-paper {
+  background-color: #383c44; /* Your preferred background color */
+  box-shadow: none; /* Remove box-shadow/border */
+  /* Add other styles if necessary */
+}
+
 @media screen and (max-width: 600px) {
   .ProductsTable thead {
     display: none; /* Hide headers on small screens */
@@ -185,5 +222,58 @@ select {
     text-align: left;
     font-weight: bold;
   }
+}
+
+/* Style the scrollbar track (background) */
+.table-container::-webkit-scrollbar-track {
+  background-color: #2e313a; /* A shade of dark color for the track */
+  border-radius: 10px;
+}
+
+/* Style the scrollbar handle */
+.table-container::-webkit-scrollbar-thumb {
+  background-color: #484e58; /* A shade of dark color for the thumb */
+  border-radius: 10px;
+  border: 3px solid #2e313a; /* Matching the track color for seamless design */
+}
+
+/* Style the scrollbar itself (width, color) */
+.table-container::-webkit-scrollbar {
+  width: 10px; /* Scrollbar width */
+  background-color: #333745; /* A darker shade for scrollbar background */
+}
+
+/* For Firefox */
+.table-container {
+  scrollbar-width: thin; /* "auto" or "thin" */
+  scrollbar-color: #484e58 #2e313a; /* thumb and track color */
+}
+
+.productTableButton {
+  background-color: #EB9486 !important; /* Add !important to enforce this style */
+  color: #fff !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  margin-right: 10px !important; /* Add spacing between buttons */
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  transition: background-color 0.3s !important;
+}
+
+.productTableButton:last-child {
+  margin-right: 0 !important; /* No margin on the last button */
+}
+
+.productTableButton:hover {
+  background-color: #CAE7B9 !important; /* Enforce hover color */
+}
+
+.productCheckbox {
+  color: #F3DE8A !important; /* Use the color from your app's palette */
+}
+
+/* Checked state */
+.productCheckbox.Mui-checked {
+  color: #F3DE8A !important;
 }
 

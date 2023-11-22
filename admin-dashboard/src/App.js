@@ -226,6 +226,8 @@ function App() {
                     selectedTab={selectedTab}
                     handleTabChange={handleTabChange}
                 />
+            </div>
+            <div className="table-container">
                 {selectedTab === 'Products' && <ProductTable products={tableData} />}
             </div>
             <ToastContainer />
