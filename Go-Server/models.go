@@ -17,6 +17,11 @@ type Product struct {
 	Description string `json:"description"`
 }
 
+type Category struct {
+	ID   int    `json:"categoryID"`
+	Name string `json:"categoryName"`
+}
+
 type NewVendor struct {
 	Name string `json:"vendor"`
 }

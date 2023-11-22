@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -55,6 +56,30 @@ func getAllVendors(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(vendors)
 }
 
+func getAllCategories(w http.ResponseWriter, r *http.Request) {
+
+	rows, err := db.Query("SELECT Category_ID, Cat_Name FROM categories ORDER BY Cat_Name;")
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	var categories []string
+
+	for rows.Next() {
+		var v string
+		err := rows.Scan(&v)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		categories = append(categories, v)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(categories)
+}
+
 func addNewVendor(w http.ResponseWriter, r *http.Request) {
 	var request NewVendor
 
@@ -83,34 +108,6 @@ func addNewVendor(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
-}
-
-func categoriesDropDown(w http.ResponseWriter, r *http.Request) {
-
-	vars := mux.Vars(r)
-	vendorName := vars["vendor"]
-	fmt.Println("Vendor Name:", vendorName)
-
-	rows, err := db.Query("SELECT Cat_Name FROM categories NATURAL JOIN vendors WHERE Vendor_Name = ?", vendorName)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	var categories []string
-
-	for rows.Next() {
-		var c string
-		err := rows.Scan(&c)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		categories = append(categories, c)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(categories)
 }
 
 func addNewCategory(w http.ResponseWriter, r *http.Request) {
@@ -163,20 +160,25 @@ func addNewProduct(w http.ResponseWriter, r *http.Request) {
 	var request NewProduct
 
 	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
+		return
+	}
+
+	err = db.QueryRow("SELECT Prod_Name FROM products WHERE Prod_Name = ?", request.Name).Scan()
+	if err != sql.ErrNoRows {
+		writeJSONErrorResponse(w, http.StatusBadRequest, "Product already exists")
+		return
+	}
 
 	if err := newProductValidation(request); err != nil {
 		writeJSONErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err != nil {
-		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
-		return
-	}
-
 	productInsertStatement, err := db.Prepare("CALL InsertNewProduct(?, ?, ?, ?, ?)")
 	if err != nil {
-		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL statement error")
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL procedure error")
 		return
 	}
 	defer productInsertStatement.Close()
@@ -190,7 +192,35 @@ func addNewProduct(w http.ResponseWriter, r *http.Request) {
 	writeJSONSuccessResponse(w, http.StatusCreated, "Product Successfully Added")
 }
 
-func writeJSONErrorResponse(w http.ResponseWriter, statusCode int, errMessage string) { //method to reduce code repetition when returning a JSON formatted error response
+func categoriesDropDown(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	vendorName := vars["vendor"]
+	fmt.Println("Vendor Name:", vendorName)
+
+	rows, err := db.Query("SELECT Cat_Name FROM categories NATURAL JOIN vendors WHERE Vendor_Name = ?", vendorName)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	var categories []string
+
+	for rows.Next() {
+		var c string
+		err := rows.Scan(&c)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		categories = append(categories, c)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(categories)
+}
+
+func writeJSONErrorResponse(w http.ResponseWriter, statusCode int, errMessage string) {
 	response := SuccessResponse{Success: false, Error: errMessage}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
