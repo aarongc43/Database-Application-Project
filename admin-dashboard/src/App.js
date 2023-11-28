@@ -13,7 +13,9 @@ import {
     fetchCategoriesForVendor,
     sendProductToSQL,
     addVendorToSQL,
-    addCategoryToSQL
+    addCategoryToSQL,
+    editProductSQL,
+    deleteProductSQL
 } from './components/api.js';
 
 function App() {
@@ -31,6 +33,9 @@ function App() {
     const [tableData, setTableData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [currentProduct, setCurrentProduct] = useState(null);
+    const [editingProductId, setEditingProductId] = useState(null);
 
     // go server is seeing this as an object
     const initialNewProductState = {
@@ -64,6 +69,7 @@ function App() {
                 }
             } catch (error) {
                 setError(error.message);
+                toast.error(`Error occurred: ${error.message}`);
             } finally {
                 if (isMounted) {
                     setLoading(false);
@@ -165,6 +171,33 @@ function App() {
         }
     };
 
+    // Function to handle editing a product
+    const editProduct = (product) => {
+        setCurrentProduct(product);
+        setIsEditModalOpen(true);
+    };
+
+    // Function to close the edit modal
+    const closeEditModal = () => {
+        setIsEditModalOpen(false);
+        setCurrentProduct(null);
+    };
+
+    // Function to handle the submission of the edited product
+    const submitEditProduct = async (editedProduct) => {
+        const credentials = getCredentials();
+        try {
+            await editProductSQL(editedProduct, credentials); 
+            toast.success('Product updated successfully!');
+            closeEditModal();
+            // Refresh the products list
+            const updatedProducts = await fetchProducts();
+            setTableData(updatedProducts);
+        } catch (error) {
+            toast.error(`Error updating product: ${error.message}`);
+        }
+    };
+
     const getCredentials = () => {
         const username = prompt("Enter your username:");
         const password = prompt("Enter your password:");
@@ -189,6 +222,24 @@ function App() {
         return `$${value}`;
     };
 
+    const handleDelete = async (selectedProducts) => {
+        if (!selectedProducts.length || !window.confirm('Are you sure you want to delete the selected products?')) {
+            return;
+        }
+
+        const credentials = getCredentials();
+        try {
+            for (const product of selectedProducts) {
+                await deleteProductSQL(product.productID, credentials); // Assuming deleteProductSQL is your API call function
+            }
+
+            toast.success('Product(s) deleted successfully!');
+            const updatedProducts = await fetchProducts(); // fetch the updated list of products
+            setTableData(updatedProducts);
+        } catch (error) {
+            toast.error(`Error deleting product: ${error.message}`);
+        }
+    };
 
     return (
         <div className="app-container">
@@ -226,7 +277,16 @@ function App() {
                     selectedTab={selectedTab}
                     handleTabChange={handleTabChange}
                 />
-                {selectedTab === 'Products' && <ProductTable products={tableData} />}
+            </div>
+            <div className="table-container">
+                {selectedTab === 'Products' && <ProductTable 
+                    products={tableData} 
+                    onEditSubmit={submitEditProduct}
+                    editingProductId={editingProductId}
+                    setEditingProductId={setEditingProductId}
+                    editProduct={editProduct} 
+                    deleteProduct={handleDelete}
+                   />} 
             </div>
             <ToastContainer />
         </div>

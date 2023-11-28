@@ -84,4 +84,30 @@ export const addCategoryToSQL = async (categoryData, credentials) => {
   return handleResponse(response);
 };
 
+export const editProductSQL = async (product, credentials) => {
+  console.log(`Trying to contact SQL", ${product.productID}`);
+  const url = `${API_BASE_URL}/protected/products/${product.productID}`;
 
+  const response = await fetch(url, {
+    method: 'PUT', 
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Basic ' + btoa(`${credentials.username}:${credentials.password}`),
+    },
+    body: JSON.stringify(product),
+  });
+  return handleResponse(response);
+};
+
+export const deleteProductSQL = async (productID, credentials) => {
+  
+  const url = `${API_BASE_URL}/protected/products/${productID}`;
+
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      'Authorization' : 'Basic ' + btoa(`${credentials.username}:${credentials.password}`),  
+    },
+  });
+  return handleResponse(response);
+};

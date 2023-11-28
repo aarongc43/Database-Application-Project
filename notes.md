@@ -2,15 +2,15 @@
 
 ## Aaron's Task List
 
-[ ]add constraints to add vendor then category
-[ ]price constraints $
-[ ]int for quantity
-[ ]add tables
-[ ]pretty tables
+[x]add constraints, to add vendor then category
+[x]price constraints $
+[x]int for quantity
+[x]add tables
+[x]pretty tables
 [ ]sort product tables
 [ ]search product form
-[ ]edit products form
-[ ]delete product form
+[x]edit products form
+[x]delete product form
 
 ## Table Features
 product
