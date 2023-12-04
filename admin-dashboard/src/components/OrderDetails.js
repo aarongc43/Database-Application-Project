@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 function OrderDetails({ orderDetails }) {
-    if (!orderDetails) return <div>No order details available.</div>;
+    if (!orderDetails) return <div className="container">No order details available.</div>;
 
     return (
-        <div>
-            <h3>Order Details</h3>
-            <table>
+        <div className="container">
+            <h3 style={{ color: '#F3DE8A' }}>Order Details</h3> {/* Color as per CSS */}
+            <table className="ProductsTable" aria-label="order details table">
                 <thead>
                     <tr>
                         <th>Order ID</th>
@@ -29,3 +29,4 @@ function OrderDetails({ orderDetails }) {
 }
 
 export default OrderDetails;
+

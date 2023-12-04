@@ -38,7 +38,7 @@ export const fetchTableData = async (tableName) => {
 };
 
 export const fetchOrderDetails = async () => {
-  const response = `${API_BASE_URL}/getOrderDetails`;
+  const response = await fetch(`${API_BASE_URL}/getOrderDetails`);
   return handleResponse(response);
 };
 

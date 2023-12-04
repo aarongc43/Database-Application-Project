@@ -38,6 +38,7 @@ function App() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [currentProduct, setCurrentProduct] = useState(null);
     const [editingProductId, setEditingProductId] = useState(null);
+    const [orderDetailTableData, setOrderDetailTableData] = useState([]);
 
     // go server is seeing this as an object
     const initialNewProductState = {
@@ -48,6 +49,12 @@ function App() {
         quantity: "",
         description: ""
     };
+
+    const orderDetailData = {
+        productID: "",
+        orderID: "",
+        quantity: "",
+    }
 
     // helper functions for loading and error updates
     const [newProduct, setNewProduct] = useState(initialNewProductState);
@@ -166,11 +173,13 @@ function App() {
             let data;
             if (tableName === "Products") {
                 data = await fetchProducts();
-            } else if (tableName === "OrderDetails") {
+                console.log(data);
+                setTableData(data);
+            } else if (tableName === "Order Details") {
                 data = await fetchOrderDetails();
+                setOrderDetailTableData(data);
+                console.log(data);
             }
-            console.log(data);
-            setTableData(data);
         } catch (error) {
             toast.error(`Error sending product data: ${error.message}`);
         } finally {
@@ -297,7 +306,7 @@ function App() {
                    />
                 ) : selectedTab === 'Order Details' ? (
                 <OrderDetails
-                    orderDetails={tableData}
+                    orderDetails={orderDetailTableData}
                     />
                     ) : null}
             </div>
