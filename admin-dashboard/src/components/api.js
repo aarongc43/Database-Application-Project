@@ -24,18 +24,21 @@ export const fetchVendors = async() => {
 export const fetchCategories = async(vendorName) => {
 
   const response = await fetch(`${API_BASE_URL}/categories/${vendorName}`);
-
   return handleResponse(response);
 };
 
 export const fetchProducts = async () => {
   const response = await fetch(`${API_BASE_URL}/getProducts`);
-
   return handleResponse(response);
 };
 
 export const fetchTableData = async (tableName) => {
   const response = `${API_BASE_URL}/get${tableName}`;
+  return handleResponse(response);
+};
+
+export const fetchOrderDetails = async () => {
+  const response = `${API_BASE_URL}/getOrderDetails`;
   return handleResponse(response);
 };
 
@@ -111,3 +114,4 @@ export const deleteProductSQL = async (productID, credentials) => {
   });
   return handleResponse(response);
 };
+

@@ -5,11 +5,13 @@ import './App.css';
 import TableViews from './components/TableViews.js';
 import FormsUI from './components/FormsUI.js';
 import ProductTable from './components/ProductTable.js';
+import OrderDetails from './components/OrderDetails.js';
 import {
     fetchVendors, 
     fetchCategories, 
     fetchProducts, 
     fetchTableData,
+    fetchOrderDetails,
     fetchCategoriesForVendor,
     sendProductToSQL,
     addVendorToSQL,
@@ -161,7 +163,12 @@ function App() {
         setSelectedTab(tableName);
         setLoading(true);
         try {
-            const data = await fetchProducts();
+            let data;
+            if (tableName === "Products") {
+                data = await fetchProducts();
+            } else if (tableName === "OrderDetails") {
+                data = await fetchOrderDetails();
+            }
             console.log(data);
             setTableData(data);
         } catch (error) {
@@ -279,14 +286,20 @@ function App() {
                 />
             </div>
             <div className="table-container">
-                {selectedTab === 'Products' && <ProductTable 
+                {selectedTab === 'Products' ?  (
+                <ProductTable 
                     products={tableData} 
                     onEditSubmit={submitEditProduct}
                     editingProductId={editingProductId}
                     setEditingProductId={setEditingProductId}
                     editProduct={editProduct} 
                     deleteProduct={handleDelete}
-                   />} 
+                   />
+                ) : selectedTab === 'Order Details' ? (
+                <OrderDetails
+                    orderDetails={tableData}
+                    />
+                    ) : null}
             </div>
             <ToastContainer />
         </div>
