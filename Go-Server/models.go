@@ -17,6 +17,8 @@ type OrderDetails struct {
 
 type Product struct {
 	ID          int    `json:"productID"`
+	Vendor      string `json:"vendor"`
+	Category    string `json:"category"`
 	Name        string `json:"productName"`
 	Price       string `json:"price"`
 	Quantity    string `json:"quantity"`

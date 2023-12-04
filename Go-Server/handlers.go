@@ -32,7 +32,7 @@ func getOrderDetails(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllProducts(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT Product_Id, Prod_Name, Prod_Price, Prod_Qty, Prod_Desc FROM products ORDER BY Prod_Name;")
+	rows, err := db.Query("SELECT Product_Id, Cat_Name, Vendor_Name, Prod_Name, Prod_Price, Prod_Qty, Prod_Desc FROM products NATURAL JOIN categories NATURAL JOIN vendors ORDER BY Prod_Name;")
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -42,7 +42,7 @@ func getAllProducts(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var p Product
-		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Quantity, &p.Description)
+		err := rows.Scan(&p.ID, &p.Category, &p.Vendor, &p.Name, &p.Price, &p.Quantity, &p.Description)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
