@@ -18,13 +18,17 @@ func handleRequest(corsMiddleware func(http.Handler) http.Handler) {
 	protectedRoute := myRouter.PathPrefix("/protected").Subrouter()
 	protectedRoute.Use(BasicAuthMiddleware)
 	protectedRoute.Use(corsMiddleware)
-	protectedRoute.HandleFunc("/products", addNewProduct)
-	protectedRoute.HandleFunc("/addVendor", addNewVendor)
-
 	myRouter.Use(corsMiddleware)
-	myRouter.HandleFunc("/vendors", getAllVendors)
+
+	protectedRoute.HandleFunc("/products", addProduct).Methods("POST", "OPTIONS")
+	protectedRoute.HandleFunc("/products/{productID}", updateProduct).Methods("PUT", "OPTIONS")
+	protectedRoute.HandleFunc("/products/{productID}", deleteProduct).Methods("DELETE", "OPTIONS")
+
+	protectedRoute.HandleFunc("/addVendor", addNewVendor).Methods("POST", "OPTIONS")
+	protectedRoute.HandleFunc("/addCategory", addNewCategory).Methods("POST", "OPTIONS")
+
+	myRouter.HandleFunc("/vendors", getAllVendors).Methods("GET", " OPTIONS")
 	myRouter.HandleFunc("/categories/{vendor}", categoriesDropDown)
-	myRouter.HandleFunc("/addCategory", addNewCategory)
 	myRouter.HandleFunc("/getCategories", getAllCategories)
 	myRouter.HandleFunc("/getProducts", getAllProducts)
 

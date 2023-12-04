@@ -156,7 +156,7 @@ func addNewCategory(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func addNewProduct(w http.ResponseWriter, r *http.Request) {
+func addProduct(w http.ResponseWriter, r *http.Request) {
 	var request NewProduct
 
 	err := json.NewDecoder(r.Body).Decode(&request)
@@ -165,14 +165,14 @@ func addNewProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.QueryRow("SELECT Prod_Name FROM products WHERE Prod_Name = ?", request.Name).Scan()
-	if err != sql.ErrNoRows {
-		writeJSONErrorResponse(w, http.StatusBadRequest, "Product already exists")
+	if err := productAddValidation(request); err != nil {
+		writeJSONErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := newProductValidation(request); err != nil {
-		writeJSONErrorResponse(w, http.StatusBadRequest, err.Error())
+	err = db.QueryRow("SELECT Prod_Name FROM products WHERE Prod_Name = ?", request.Name).Scan()
+	if err != sql.ErrNoRows {
+		writeJSONErrorResponse(w, http.StatusBadRequest, "Product already exists")
 		return
 	}
 
@@ -190,6 +190,59 @@ func addNewProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSONSuccessResponse(w, http.StatusCreated, "Product Successfully Added")
+}
+
+func updateProduct(w http.ResponseWriter, r *http.Request) {
+	var request Product
+
+	vars := mux.Vars(r)
+	productID := vars["productID"]
+
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusBadRequest, "Invalid JSON data")
+		return
+	}
+
+	if err := productUpdateValidation(request); err != nil {
+		writeJSONErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	productUpdateStatement, err := db.Prepare("CALL UpdateProduct(?, ?, ?, ?, ?)")
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL procedure error")
+		return
+	}
+	defer productUpdateStatement.Close()
+
+	_, err = productUpdateStatement.Exec(productID, request.Name, request.Price, request.Quantity, request.Description)
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "Product modification error")
+		return
+	}
+
+	writeJSONSuccessResponse(w, http.StatusCreated, "Product Successfully Modified")
+}
+
+func deleteProduct(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	productID := vars["productID"]
+
+	productDeleteStatement, err := db.Prepare("CALL DeleteProduct(?)")
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "SQL procedure error")
+		return
+	}
+	defer productDeleteStatement.Close()
+
+	_, err = productDeleteStatement.Exec(productID)
+	if err != nil {
+		writeJSONErrorResponse(w, http.StatusInternalServerError, "Product modification error")
+		return
+	}
+
+	writeJSONSuccessResponse(w, http.StatusCreated, "Product Successfully Deleted")
 }
 
 func categoriesDropDown(w http.ResponseWriter, r *http.Request) {
