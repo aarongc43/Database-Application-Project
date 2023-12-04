@@ -10,8 +10,8 @@ type NewProduct struct {
 }
 
 type OrderDetails struct {
-	OrderID   int `json:"productID"`
-	ProductID int `json:"orderID"`
+	OrderID   int `json:"orderID"`
+	ProductID int `json:"productID"`
 	Quantity  int `json:"quantity"`
 }
 
