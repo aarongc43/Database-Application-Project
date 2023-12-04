@@ -9,6 +9,12 @@ type NewProduct struct {
 	Description string `json:"description"`
 }
 
+type OrderDetails struct {
+	OrderID   int `json:"productID"`
+	ProductID int `json:"orderID"`
+	Quantity  int `json:"quantity"`
+}
+
 type Product struct {
 	ID          int    `json:"productID"`
 	Name        string `json:"productName"`

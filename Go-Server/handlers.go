@@ -9,6 +9,28 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func getOrderDetails(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Query("SELECT Order_ID, Product_ID, Quantity FROM orderdetails")
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	var orderdetails []OrderDetails
+
+	for rows.Next() {
+		var od OrderDetails
+		err := rows.Scan(&od.OrderID, &od.ProductID, &od.Quantity)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		orderdetails = append(orderdetails, od)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(orderdetails)
+}
+
 func getAllProducts(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.Query("SELECT Product_Id, Prod_Name, Prod_Price, Prod_Qty, Prod_Desc FROM products ORDER BY Prod_Name;")
 
@@ -30,6 +52,7 @@ func getAllProducts(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(products)
+
 }
 
 func getAllVendors(w http.ResponseWriter, r *http.Request) {

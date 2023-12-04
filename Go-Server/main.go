@@ -27,6 +27,7 @@ func handleRequest(corsMiddleware func(http.Handler) http.Handler) {
 	protectedRoute.HandleFunc("/addVendor", addNewVendor).Methods("POST", "OPTIONS")
 	protectedRoute.HandleFunc("/addCategory", addNewCategory).Methods("POST", "OPTIONS")
 
+	myRouter.HandleFunc("/getOrderDetails", getOrderDetails).Methods("GET", "OPTIONS")
 	myRouter.HandleFunc("/vendors", getAllVendors).Methods("GET", " OPTIONS")
 	myRouter.HandleFunc("/categories/{vendor}", categoriesDropDown)
 	myRouter.HandleFunc("/getCategories", getAllCategories)
